@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792212827176,
+      "tag": "0000_create_attendees",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792212827177,
+      "tag": "0001_improve_check_in",
+      "breakpoints": true
+    }
+  ]
+}
