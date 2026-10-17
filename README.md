@@ -1,5 +1,11 @@
 # GatePass — QR-Based Event Check-In
 
+🌐 Live Website: https://byteforce-virid.vercel.app
+
+🎥 Project Demo Video: [Watch GatePass Demo](https://drive.google.com/file/d/1Z_gB2F60gHVI0Mk37CWZsTd4ub0McwQV/view?usp=sharing)
+
+💻 GitHub Repository: https://github.com/tusharkamble2127/ByteForce
+
 A premium, production-ready event management application that enables organizers to register attendees, issue unique QR passes, and verify entry at events with reliable duplicate prevention.
 
 ## Problem Statement
