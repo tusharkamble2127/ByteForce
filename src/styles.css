@@ -1325,3 +1325,163 @@ input:focus, select:focus, textarea:focus {
   background: rgba(17, 20, 11, 0.12);
   color: #11140b;
 }
+
+
+/* GatePass — animated event-tech dashboard atmosphere */
+.dashboard-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+
+/* Ambient lighting + subtle digital grid */
+.dashboard-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 8% 18%,
+      rgba(197, 243, 74, 0.11),
+      transparent 30%
+    ),
+    radial-gradient(
+      ellipse at 92% 48%,
+      rgba(38, 180, 153, 0.075),
+      transparent 32%
+    ),
+    radial-gradient(
+      ellipse at 55% 100%,
+      rgba(197, 243, 74, 0.045),
+      transparent 38%
+    ),
+    linear-gradient(
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    ),
+    #0b0e10;
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    48px 48px,
+    48px 48px,
+    100% 100%;
+  animation: gatepass-ambient 18s ease-in-out infinite alternate;
+}
+
+/* Soft glow behind dashboard content */
+.dashboard-shell::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  top: 90px;
+  right: -120px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: rgba(197, 243, 74, 0.045);
+  filter: blur(90px);
+  animation: gatepass-float 12s ease-in-out infinite alternate;
+}
+
+/* Smooth lift and subtle lime border on hover */
+.dashboard-shell .dashboard-profile,
+.dashboard-shell .dashboard-signout {
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.dashboard-shell .dashboard-profile:hover {
+  box-shadow: 0 0 24px rgba(197, 243, 74, 0.055);
+}
+
+.dashboard-shell .dashboard-signout:hover {
+  box-shadow: 0 5px 22px rgba(197, 243, 74, 0.07);
+}
+
+/* Gentle animation for the existing attendance progress bar */
+.dashboard-shell .bg-primary {
+  transition: width 500ms ease;
+}
+
+/* Motion */
+@keyframes gatepass-ambient {
+  from {
+    background-position:
+      0% 0%,
+      100% 50%,
+      50% 100%,
+      0 0,
+      0 0,
+      0 0;
+  }
+
+  to {
+    background-position:
+      8% 12%,
+      92% 42%,
+      45% 90%,
+      12px 8px,
+      8px 12px,
+      0 0;
+  }
+}
+
+@keyframes gatepass-float {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.92);
+    opacity: 0.45;
+  }
+
+  to {
+    transform: translate3d(-45px, 35px, 0) scale(1.12);
+    opacity: 0.9;
+  }
+}
+
+/* Respect accessibility preferences */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell::before,
+  .dashboard-shell::after {
+    animation: none !important;
+  }
+
+  .dashboard-shell *,
+  .dashboard-shell *::before,
+  .dashboard-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Keep the background lightweight on mobile */
+@media (max-width: 640px) {
+  .dashboard-shell::before {
+    background-size:
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      36px 36px,
+      36px 36px,
+      100% 100%;
+  }
+
+  .dashboard-shell::after {
+    width: 180px;
+    height: 180px;
+    filter: blur(65px);
+  }
+}
