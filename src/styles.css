@@ -1487,7 +1487,21 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
+/* Keep dashboard content above the animated background */
 .dashboard-shell > * {
   position: relative;
   z-index: 1;
+}
+
+/* Fix: keep the pass overlay fixed to the viewport on screen.
+   The dashboard direct-child rule below otherwise changes it to position: relative. */
+@media screen {
+  .dashboard-shell > [data-printable="true"] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    display: grid !important;
+    place-items: center !important;
+    overflow-y: auto !important;
+  }
 }
