@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Attendee = {
-  id: string; name: string; email: string; ticket_type: string; code: string;
+  id: string; name: string; email: string; event_name: string; ticket_type: string; code: string;
   checked_in_at: string | null; created_at: string;
 };
 type Result = { status: "ok" | "duplicate" | "invalid"; name?: string; ticket_type?: string; at?: string };
@@ -49,60 +49,200 @@ function Logo() {
   );
 }
 
+
 function AuthScreen() {
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+
   const submit = async (e: React.FormEvent) => {
-    e.preventDefault(); setBusy(true);
-    const { error, data } = mode === "in"
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ 
-          email, 
-          password, 
-          options: { 
-            emailRedirectTo: window.location.origin
-          } 
-        });
+    e.preventDefault();
+    setBusy(true);
+
+    const { error, data } =
+      mode === "in"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: window.location.origin,
+            },
+          });
+
     setBusy(false);
+
     if (error) {
       toast.error(error.message);
     } else if (mode === "up") {
-      // Check if email confirmation is required
       if (data.session) {
         toast.success("Account created successfully! You are now signed in.");
       } else {
-        toast.success("Account created! Please check your email to confirm your account.");
+        toast.success(
+          "Account created! Please check your email to confirm your account."
+        );
       }
     }
   };
+
   const google = async () => {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const r = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
     if (r.error) toast.error("Google sign-in failed");
   };
+
   return (
-    <div className="grid min-h-screen place-items-center px-4 py-8 premium-bg">
-      <div className="w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <Logo />
-        <h1 className="mt-8 text-3xl sm:text-4xl font-bold leading-tight">Doors open.<br /><span className="text-primary">Lines don't.</span></h1>
-        <p className="mt-3 text-muted-foreground">Organizer sign-in for QR check-in.</p>
-        <form onSubmit={submit} className="mt-8 space-y-4">
-          <Input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input type="password" required minLength={6} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Button className="w-full" disabled={busy}>{mode === "in" ? "Sign in" : "Create account"}</Button>
-        </form>
-        <Button variant="outline" className="mt-4 w-full" onClick={google}>Continue with Google</Button>
-        <button className="mt-4 text-sm text-muted-foreground hover:text-foreground w-full" onClick={() => setMode(mode === "in" ? "up" : "in")}>
-          {mode === "in" ? "New organizer? Create an account" : "Have an account? Sign in"}
-        </button>
-      </div>
-    </div>
+    <main className="auth-cinematic">
+      <section className="auth-panel">
+        <div className="auth-panel-inner">
+          <div className="auth-brand">
+            <Logo />
+            <span className="auth-brand-tag">EVENT OPERATIONS</span>
+          </div>
+
+          <div className="auth-copy">
+            <span className="auth-eyebrow">
+              <span className="auth-live-dot" />
+              YOUR EVENT. UNDER CONTROL.
+            </span>
+
+            <h1>
+              Doors open.
+              <br />
+              <span>Lines don’t.</span>
+            </h1>
+
+            <p>
+              Seamless entry starts here. Manage your attendees, issue digital
+              passes, and keep every check-in moving.
+            </p>
+          </div>
+
+          <form onSubmit={submit} className="auth-form">
+            <div className="auth-form-heading">
+              <h2>{mode === "in" ? "Welcome back" : "Create your account"}</h2>
+              <p>
+                {mode === "in"
+                  ? "Sign in to your organizer workspace."
+                  : "Set up your organizer account to get started."}
+              </p>
+            </div>
+
+            <label className="auth-field">
+              <span>Email address</span>
+              <Input
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </label>
+
+            <label className="auth-field">
+              <span>Password</span>
+              <Input
+                type="password"
+                required
+                minLength={6}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </label>
+
+            <Button
+              type="submit"
+              className="auth-primary-button w-full"
+              disabled={busy}
+            >
+              {busy
+                ? "Please wait..."
+                : mode === "in"
+                  ? "Sign in to GatePass →"
+                  : "Create organizer account →"}
+            </Button>
+          </form>
+
+          <div className="auth-divider">
+            <span />
+            <p>OR CONTINUE WITH</p>
+            <span />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="auth-google-button w-full"
+            onClick={google}
+          >
+            Continue with Google
+          </Button>
+
+          <p className="auth-switch">
+            {mode === "in" ? "New to GatePass?" : "Already have an account?"}
+            <button
+              type="button"
+              onClick={() => setMode(mode === "in" ? "up" : "in")}
+            >
+              {mode === "in" ? "Create an account" : "Sign in"}
+            </button>
+          </p>
+
+          <p className="auth-legal">
+            Secure organizer access · Built for smoother event entry
+          </p>
+        </div>
+      </section>
+
+      <aside className="auth-visual" aria-label="Live event atmosphere">
+        <div className="auth-visual-image" />
+
+        <div className="auth-visual-content">
+          <div className="auth-visual-top">
+            <span className="auth-image-pill">
+              <span className="auth-live-dot" />
+              THE SHOW STARTS HERE
+            </span>
+            <span className="auth-image-index">GP / 001</span>
+          </div>
+
+          <div className="auth-visual-bottom">
+            <p className="auth-image-kicker">
+              LESS WAITING. MORE EXPERIENCING.
+            </p>
+
+            <h2>
+              Every arrival
+              <br />
+              <span>sets the tone.</span>
+            </h2>
+
+            <p className="auth-image-description">
+              One pass. One scan. A better way to welcome every guest.
+            </p>
+
+            <div className="auth-floating-card">
+              <div className="auth-floating-icon">✓</div>
+              <div>
+                <strong>Entry, simplified.</strong>
+                <p>Fast QR-based check-in</p>
+              </div>
+              <span className="auth-floating-status">READY</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
   );
 }
 
+
 function Dashboard({ email }: { email: string }) {
   const [tab, setTab] = useState<"attendees" | "verify">("attendees");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "checked">("all");
   const [list, setList] = useState<Attendee[]>([]);
   const [pass, setPass] = useState<Attendee | null>(null);
   const load = useCallback(async () => {
@@ -114,13 +254,67 @@ function Dashboard({ email }: { email: string }) {
   const pct = list.length ? Math.round((checked / list.length) * 100) : 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 md:py-8 premium-bg">
+    
+<div className="dashboard-shell relative mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-10 py-6 md:py-8 premium-bg">
+
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
         <Logo />
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span className="hidden sm:inline">{email}</span>
-          <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Sign out</Button>
-        </div>
+        
+<div className="dashboard-user-actions">
+  <div className="dashboard-profile">
+    <div className="dashboard-avatar">
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M20 21a8 8 0 0 0-16 0" />
+        <circle cx="12" cy="8" r="4" />
+      </svg>
+      <span className="dashboard-online-dot" />
+    </div>
+
+    <div className="dashboard-profile-info">
+      <span className="dashboard-profile-label">ORGANIZER ACCOUNT</span>
+      <span className="dashboard-profile-email">{email}</span>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    className="dashboard-signout"
+    onClick={async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) toast.error(error.message);
+    }}
+    title="Sign out"
+    aria-label="Sign out"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M10 17l5-5-5-5" />
+      <path d="M15 12H3" />
+      <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+    </svg>
+    <span>Sign out</span>
+  </button>
+</div>
+
       </header>
 
       <section className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
@@ -144,7 +338,7 @@ function Dashboard({ email }: { email: string }) {
 
       <div className="mt-6">
         {tab === "attendees"
-          ? <Attendees list={list} onAdded={(a) => { setList([a, ...list]); setPass(a); }} onOpen={setPass} />
+          ? <Attendees list={list} statusFilter={statusFilter} setStatusFilter={setStatusFilter} onAdded={(a) => { setList([a, ...list]); setPass(a); }} onOpen={setPass} />
           : <Verify onDone={load} />}
       </div>
       {pass && <PassModal a={pass} onClose={() => setPass(null)} />}
@@ -164,14 +358,14 @@ function Stat({ label, value, accent, icon }: { label: string; value: number; ac
   );
 }
 
-function Attendees({ list, onAdded, onOpen }: { list: Attendee[]; onAdded: (a: Attendee) => void; onOpen: (a: Attendee) => void }) {
-  const [f, setF] = useState({ name: "", email: "", ticket_type: "General" });
+function Attendees({ list, statusFilter, setStatusFilter, onAdded, onOpen }: { list: Attendee[]; statusFilter: "all" | "pending" | "checked"; setStatusFilter: (value: "all" | "pending" | "checked") => void; onAdded: (a: Attendee) => void; onOpen: (a: Attendee) => void }) {
+  const [f, setF] = useState({ name: "", email: "", event_name: "", ticket_type: "General" });
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string; event_name?: string }>({});
   
   const validateForm = () => {
-    const newErrors: { name?: string; email?: string } = {};
+    const newErrors: { name?: string; email?: string; event_name?: string } = {};
     
     if (!f.name.trim()) {
       newErrors.name = "Name is required";
@@ -185,6 +379,12 @@ function Attendees({ list, onAdded, onOpen }: { list: Attendee[]; onAdded: (a: A
       newErrors.email = "Please enter a valid email address";
     }
     
+    if (!f.event_name.trim()) {
+      newErrors.event_name = "Event name is required";
+    } else if (f.event_name.trim().length < 2) {
+      newErrors.event_name = "Event name must be at least 2 characters";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -195,7 +395,8 @@ function Attendees({ list, onAdded, onOpen }: { list: Attendee[]; onAdded: (a: A
     if (!validateForm()) return;
     
     setBusy(true);
-    const { data, error } = await supabase.from("attendees").insert(f).select().single();
+    const payload = { ...f, name: f.name.trim(), email: f.email.trim(), event_name: f.event_name.trim() };
+    const { data, error } = await supabase.from("attendees").insert(payload).select().single();
     setBusy(false);
     
     if (error) { 
@@ -205,14 +406,20 @@ function Attendees({ list, onAdded, onOpen }: { list: Attendee[]; onAdded: (a: A
     
     toast.success(`Pass issued for ${f.name}`);
     onAdded(data as Attendee); 
-    setF({ name: "", email: "", ticket_type: f.ticket_type });
+    setF({ name: "", email: "", event_name: f.event_name, ticket_type: f.ticket_type });
     setErrors({});
   };
   
   const shown = useMemo(() => {
     const s = q.toLowerCase();
-    return list.filter((a) => [a.name, a.email, a.code].some((v) => v.toLowerCase().includes(s)));
-  }, [list, q]);
+    return list.filter((a) => {
+      const matchesSearch = [a.name, a.email, a.event_name, a.code].some((v) => v.toLowerCase().includes(s));
+      const matchesStatus = statusFilter === "all"
+        || (statusFilter === "checked" && Boolean(a.checked_in_at))
+        || (statusFilter === "pending" && !a.checked_in_at);
+      return matchesSearch && matchesStatus;
+    });
+  }, [list, q, statusFilter]);
   
   return (
     <div className="grid gap-6 lg:grid-cols-[350px_1fr]">
@@ -251,13 +458,37 @@ function Attendees({ list, onAdded, onOpen }: { list: Attendee[]; onAdded: (a: A
         </div>
         
         <div className="space-y-2">
+          <label className="text-sm font-medium">Event name <span className="text-destructive">*</span></label>
+          <Input
+            required
+            placeholder="e.g. ACM Buildathon 2026"
+            value={f.event_name}
+            onChange={(e) => {
+              setF({ ...f, event_name: e.target.value });
+              if (errors.event_name) setErrors({ ...errors, event_name: undefined });
+            }}
+            className={errors.event_name ? "border-destructive" : ""}
+          />
+          {errors.event_name && <p className="text-xs text-destructive">{errors.event_name}</p>}
+        </div>
+
+        <div className="space-y-2">
           <label className="text-sm font-medium">Ticket type</label>
           <select 
             className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             value={f.ticket_type} 
             onChange={(e) => setF({ ...f, ticket_type: e.target.value })}
           >
-            {["General", "VIP", "Speaker", "Staff"].map((t) => <option key={t}>{t}</option>)}
+            {["General",
+  "VIP",
+  "Speaker",
+  "Volunteer",
+  "Student",
+  "Faculty",
+  "Organizer",
+  "Sponsor / Guest",
+  "Media / Press",
+  "Exhibitor"].map((t) => <option key={t}>{t}</option>)}
           </select>
         </div>
         
@@ -278,17 +509,37 @@ function Attendees({ list, onAdded, onOpen }: { list: Attendee[]; onAdded: (a: A
             className="pl-10"
           />
         </div>
-        
+
+        <div className="attendee-status-filters" role="group" aria-label="Filter attendees by check-in status">
+          {([
+            { value: "all", label: "All", count: list.length },
+            { value: "pending", label: "Pending", count: list.filter((a) => !a.checked_in_at).length },
+            { value: "checked", label: "Checked in", count: list.filter((a) => Boolean(a.checked_in_at)).length },
+          ] as const).map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              onClick={() => setStatusFilter(filter.value)}
+              className={`attendee-filter ${statusFilter === filter.value ? "active" : ""}`}
+              aria-pressed={statusFilter === filter.value}
+            >
+              {filter.label}
+              <span>{filter.count}</span>
+            </button>
+          ))}
+        </div>
+
         <ul className="divide-y rounded-xl border bg-card overflow-hidden">
           {shown.length === 0 && (
             <li className="p-8 text-center text-sm text-muted-foreground">
-              {q ? "No attendees match your search." : "No attendees registered yet."}
+              {q ? "No attendees match your search and filter." : statusFilter !== "all" ? `No ${statusFilter === "checked" ? "checked-in" : "pending"} attendees.` : "No attendees registered yet."}
             </li>
           )}
           {shown.map((a) => (
             <li key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 hover:bg-muted/50 transition-colors">
               <div className="min-w-0 flex-1 w-full">
                 <p className="font-medium truncate">{a.name}</p>
+                <p className="mt-1 truncate text-xs text-primary">{a.event_name || "Legacy attendee — event not set"}</p>
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                   <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{a.ticket_type}</span>
                   <p className="truncate text-xs text-muted-foreground">{a.email}</p>
@@ -355,12 +606,14 @@ function PassModal({ a, onClose }: { a: Attendee; onClose: () => void }) {
 
       ctx.fillStyle = "#35451c";
       ctx.font = "14px monospace";
-      ctx.fillText("GATEPASS · GENERAL ADMISSION", padding, 38);
+      ctx.fillText(`GATEPASS · ${(a.ticket_type || "GENERAL").toUpperCase()} TICKET`, padding, 38);
       ctx.fillStyle = "#10130b";
       ctx.font = "bold 30px Arial, sans-serif";
-      ctx.fillText(a.name.slice(0, 32), padding, 84);
+      ctx.fillText(a.name.slice(0, 32), padding, 80);
       ctx.font = "16px Arial, sans-serif";
-      ctx.fillText(`${a.ticket_type} Ticket`, padding, 116);
+      ctx.fillText(`${a.ticket_type} Ticket`, padding, 110);
+      ctx.font = "bold 17px Arial, sans-serif";
+      ctx.fillText((a.event_name || "Event not set").slice(0, 48), padding, 136);
 
       // Status and QR code
       ctx.fillStyle = a.checked_in_at ? "#a9b0bb" : "#b7ed45";
@@ -459,6 +712,7 @@ function PassModal({ a, onClose }: { a: Attendee; onClose: () => void }) {
               </div>
               <p className="font-mono text-xs uppercase tracking-wider opacity-75 mb-1">{a.ticket_type} Ticket</p>
               <p className="text-2xl font-bold tracking-tight">{a.name}</p>
+              <p className="mt-2 text-sm font-semibold tracking-wide">{a.event_name || "Event not set"}</p>
             </div>
           </div>
           
@@ -493,6 +747,10 @@ function PassModal({ a, onClose }: { a: Attendee; onClose: () => void }) {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Email</span>
                 <span className="font-medium">{a.email}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-muted-foreground">Event</span>
+                <span className="font-medium text-right">{a.event_name || "Event not set"}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Ticket Type</span>
